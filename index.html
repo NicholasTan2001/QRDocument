@@ -61,7 +61,8 @@
 
         input {
             padding: 10px;
-            width: 300px;
+            width: 500px;
+            max-width: 100%;
             border-radius: 5px;
             border: 1px solid #ccc;
             font-size: 16px;
@@ -84,12 +85,22 @@
             display: none; 
             margin-top: 20px;
         }
+
+        @media (max-width: 1000px) {
+            .input-group-custom button {
+                margin-top: 10px;
+            }
+        }
     </style>
 </head>
 <body>
-    <h1>Convert PDF into QR Code</h1>
+    <h1>Convert Link into QR Code</h1>
 
     <div class="container mt-5">
+        <p class="text-danger">Tips: You just can submit a valid link to generate the QR Code. Copy link from Google Drive for specific files such as PDF, PNG, JPEG, and more.</p>
+    </div>
+
+    <div class="container mt-3">
         <button class="btn" onclick="window.open('https://drive.google.com/drive/my-drive', '_blank')">
             <i class="fa-brands fa-google-drive"></i>
             &ensp; Go to Google Drive
@@ -98,8 +109,8 @@
 
     <div class="container mt-5">
         <div class="row">
-            <div class="col">
-                <input type="text" id="pdfLink" placeholder="Paste Google Drive PDF link here">
+            <div class="col input-group-custom">
+                <input type="text" id="pdfLink" placeholder="Paste a valid link here">
                 <button class="btn ms-3" onclick="generateQRCode()">Generate QR Code</button>
             </div>
         </div>
@@ -119,7 +130,6 @@
         </div>
     </div>
 
-    <!-- Download Button -->
     <div class="container">
         <button id="downloadBtn" class="btn" onclick="downloadQRCode()">Download QR Code</button>
     </div>
@@ -129,6 +139,16 @@
     <script>
         let qrGenerated = false; 
 
+        // Function to check valid URL
+        function isValidURL(string) {
+            try {
+                const url = new URL(string);
+                return url.protocol === "http:" || url.protocol === "https:";
+            } catch (_) {
+                return false;  
+            }
+        }
+
         function generateQRCode() {
             const link = document.getElementById('pdfLink').value.trim();
             const qrcodeContainer = document.getElementById('qrcode');
@@ -137,20 +157,26 @@
 
             qrcodeContainer.innerHTML = '';
 
-            if (link) {
-                qrCard.style.display = 'inline-block';
-                downloadBtn.style.display = 'inline-block'; 
-
-                new QRCode(qrcodeContainer, {
-                    text: link,
-                    width: 200,
-                    height: 200,
-                });
-
-                qrGenerated = true;
-            } else {
-                alert('Please enter a PDF link.');
+            if (!link) {
+                alert('Please enter a link.');
+                return;
             }
+
+            if (!isValidURL(link)) {
+                alert('Invalid link! Please enter a proper URL.');
+                return;
+            }
+
+            qrCard.style.display = 'inline-block';
+            downloadBtn.style.display = 'inline-block'; 
+
+            new QRCode(qrcodeContainer, {
+                text: link,
+                width: 200,
+                height: 200,
+            });
+
+            qrGenerated = true;
         }
 
         function downloadQRCode() {
