@@ -81,14 +81,14 @@
             padding: 0;
         }
 
-        #downloadBtn {
+        #downloadBtn, #shareBtn {
             display: none; 
             margin-top: 20px;
         }
 
         @media (max-width: 1000px) {
             .input-group-custom button {
-                margin-top: 10px;
+                margin-top: 30px;
             }
         }
     </style>
@@ -131,7 +131,13 @@
     </div>
 
     <div class="container">
-        <button id="downloadBtn" class="btn" onclick="downloadQRCode()">Download QR Code</button>
+        <div class="row">
+            <div class="col">
+                <button id="downloadBtn" class="btn" onclick="downloadQRCode()">Download QR Code</button>
+                
+                <button id="shareBtn" class="btn ms-3" onclick="shareQRCode()">Share QR Code</button>
+            </div>
+        </div>
     </div>
 
     <!-- QRCode.js library -->
@@ -154,6 +160,7 @@
             const qrcodeContainer = document.getElementById('qrcode');
             const qrCard = document.getElementById('qrCard');
             const downloadBtn = document.getElementById('downloadBtn');
+            const shareBtn = document.getElementById('shareBtn');
 
             qrcodeContainer.innerHTML = '';
 
@@ -169,6 +176,7 @@
 
             qrCard.style.display = 'inline-block';
             downloadBtn.style.display = 'inline-block'; 
+            shareBtn.style.display = 'inline-block'; 
 
             new QRCode(qrcodeContainer, {
                 text: link,
@@ -188,6 +196,29 @@
                 link.href = qrCanvas.toDataURL("image/png");
                 link.download = "QRCode.png";
                 link.click();
+            } else {
+                alert('Please generate a QR Code first.');
+            }
+        }
+
+        function shareQRCode() {
+            if (!qrGenerated) return;
+
+            const qrCanvas = document.querySelector('#qrcode canvas');
+            if (qrCanvas) {
+                qrCanvas.toBlob(blob => {
+                    const file = new File([blob], "QRCode.png", { type: "image/png" });
+
+                    if (navigator.share) {
+                        navigator.share({
+                            title: "QR Code",
+                            text: "Here’s a QR code link!",
+                            files: [file],
+                        }).catch(err => console.log("Sharing failed:", err));
+                    } else {
+                        alert("Sharing is not supported in this browser. Please download the QR code instead.");
+                    }
+                });
             } else {
                 alert('Please generate a QR Code first.');
             }
